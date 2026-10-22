@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoSense — Final Presentation · Ember Deck</title>
+<link rel="stylesheet" href="css/ember.css">
+</head>
+<body>
+<div id="app">
+<div id="deck">
+  <canvas id="fx" width="1280" height="720"></canvas>
+  <div class="scanline"></div>
+  <div class="beam"></div>
+  <div id="bar"><i></i></div>
+  <div id="hud"><span class="dot"></span> AUTOSENSE · LIVE · <span id="liveclock">00:00:00</span></div>
+  <div id="count"><b>01</b> / 10</div>
+  <div id="hint">← → NAVIGATE · <b>T</b> THEME · <b>P</b> PDF · <b>F</b> FULLSCREEN · EDGE CLICK</div>
+
+  <div class="edgezone left" id="edgeL"><span>‹</span></div>
+  <div class="edgezone right" id="edgeR"><span>›</span></div>
+
+  <!-- 01 TITLE -->
+  <section class="slide active" id="s1">
+    <div class="slash"></div>
+    <div class="rv" style="--d:.05s">
+      <span class="livepill"><i></i> FINAL PRESENTATION · SESSION 2026–27</span>
+    </div>
+    <h1 class="rv" style="--d:.12s">AI-Based <span class="hl">Real-Time Object Detection</span> and Perception System for Autonomous Vehicles</h1>
+    <div class="chips rv" style="--d:.22s">
+      <span class="chip">YOLO11n</span><span class="plus">+</span>
+      <span class="chip">BYTETRACK</span><span class="plus">+</span>
+      <span class="chip">TTC / ROI</span><span class="plus">+</span>
+      <span class="chip">FASTAPI DASHBOARD</span>
+    </div>
+    <p class="lead rv" style="--d:.3s;max-width:720px">Camera-only Mini Project: detect, track, measure distance, fit a dynamic corridor, compute TTC, publish an advisory CONTINUE / WARNING / BRAKE — and never invent ego speed or fake lanes.</p>
+    <div class="flow rv" style="--d:.38s">
+      <div class="fn">VIDEO</div><div class="fa"></div>
+      <div class="fn hot">YOLO11</div><div class="fa"></div>
+      <div class="fn">TRACK</div><div class="fa"></div>
+      <div class="fn">DISTANCE</div><div class="fa"></div>
+      <div class="fn">ROI</div><div class="fa"></div>
+      <div class="fn">TTC</div><div class="fa"></div>
+      <div class="fn">DASH</div>
+    </div>
+    <div class="kpis rv" style="--d:.48s;margin-top:14px;max-width:760px">
+      <div class="kpi"><div class="n">0.418</div><div class="l">mAP50 · BDD val</div></div>
+      <div class="kpi"><div class="n">26.4</div><div class="l">fps GPU · RTX 2050</div></div>
+      <div class="kpi"><div class="n">10</div><div class="l">driving classes</div></div>
+      <div class="kpi"><div class="n">16</div><div class="l">tabulated tests</div></div>
+    </div>
+    <div class="meta panel rv" style="--d:.52s">
+      <div class="row">
+        <div class="lab">Presented by · CSE (Data Science)</div>
+        <div class="val">
+          <div class="member"><span>Rupal Sharma</span><span class="roll">0808DS241115</span></div>
+          <div class="member"><span>Sarthak Goyal</span><span class="roll">0808DS241122</span></div>
+          <div class="member"><span>Ritima Rajput</span><span class="roll">0808DS241113</span></div>
+          <div class="member"><span>Suhani Thakur</span><span class="roll">0808DS241133</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="lab">Guide</div>
+        <div class="val">Mr. Pankaj Pateriya · Asst. Professor</div>
+      </div>
+      <div class="row">
+        <div class="lab">Institute</div>
+        <div class="val">IPS Academy, IES, Indore · 2026–27</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 PROBLEM -->
+  <section class="slide" id="s2">
+    <div class="rv" style="--d:.05s"><div class="kick">01 · Problem, Scope &amp; Objectives</div></div>
+    <h2 class="t rv" style="--d:.1s">Pixels are not <em>perception</em></h2>
+    <p class="lead rv" style="--d:.16s">Urban driving is an open-world visual problem. A box on an image is not enough: a car in the oncoming lane is not the same hazard as a car two metres ahead in the ego path.</p>
+    <div class="two uneven">
+      <div>
+        <div class="num rv" style="--d:.2s">SEVEN QUESTIONS EVERY FRAME MUST ANSWER</div>
+        <ul class="list dense" style="margin-top:8px">
+          <li class="rv" style="--d:.24s"><span class="dotn">1</span><span><b>What</b> objects are present — class + confidence.</span></li>
+          <li class="rv" style="--d:.28s"><span class="dotn">2</span><span><b>Where</b> they are — box in the image plane.</span></li>
+          <li class="rv" style="--d:.32s"><span class="dotn">3</span><span><b>Which</b> of them lie in the driving corridor.</span></li>
+          <li class="rv" style="--d:.36s"><span class="dotn">4</span><span><b>How</b> they move — identity across frames.</span></li>
+          <li class="rv" style="--d:.4s"><span class="dotn">5</span><span><b>How close</b> — monocular D = (H · F) / h.</span></li>
+          <li class="rv" style="--d:.44s"><span class="dotn">6</span><span><b>Approaching?</b> — closing speed and TTC.</span></li>
+          <li class="rv" style="--d:.48s"><span class="dotn">7</span><span><b>Dangerous?</b> — rule table → CONTINUE / WARNING / BRAKE.</span></li>
+        </ul>
+      </div>
+      <div>
+        <table class="grid compact rv" style="--d:.26s">
+          <thead><tr><th>Item</th><th>In scope</th><th>Out of scope</th></tr></thead>
+          <tbody>
+            <tr><td>Input</td><td>One video or camera</td><td>LiDAR, radar, multi-cam</td></tr>
+            <tr><td>Detection</td><td>YOLO11 COCO / BDD</td><td>Two-stage / transformers</td></tr>
+            <tr><td>Tracking</td><td>ByteTrack / BoT-SORT</td><td>Trained Re-ID</td></tr>
+            <tr><td>Geometry</td><td>Pinhole D + classical ROI</td><td>Metric 3D cuboids</td></tr>
+            <tr><td>Safety</td><td>Advisory TTC rules</td><td>Actuation, ISO 26262</td></tr>
+            <tr><td>Software</td><td>FastAPI + static UI</td><td>Cloud fleet / mobile app</td></tr>
+          </tbody>
+        </table>
+        <p class="footnote rv" style="--d:.4s"><b>Honesty constraint:</b> if ego speed is not sensed it is published as null. Poor lane evidence is labelled uncertain — never faked.</p>
+      </div>
+    </div>
+    <div class="num rv" style="--d:.5s;margin-top:10px">EIGHT DELIVERED OBJECTIVES</div>
+    <div class="objgrid rv" style="--d:.54s;margin-top:6px">
+      <div class="mini">1. Real-time detection of road objects (YOLO11n).</div>
+      <div class="mini">2. Identity tracking across frames (ByteTrack).</div>
+      <div class="mini">3. Corridor perception — in / near / outside / uncertain.</div>
+      <div class="mini">4. Relative motion from consecutive frames.</div>
+      <div class="mini">5. Monocular distance from box height.</div>
+      <div class="mini">6. TTC + four-level risk (SAFE…CRITICAL).</div>
+      <div class="mini">7. Recorded video and live camera input.</div>
+      <div class="mini">8. Nine-page dashboard of every measured number.</div>
+    </div>
+  </section>
+
+  <!-- 03 LITERATURE -->
+  <section class="slide" id="s3">
+    <div class="rv" style="--d:.05s"><div class="kick">02 · Literature Review</div></div>
+    <h2 class="t rv" style="--d:.1s">Twelve sources, one <em>composition</em></h2>
+    <p class="lead rv" style="--d:.16s">Four clusters: single-stage detection, driving datasets, multi-object tracking, 3D surveys — plus classical edges, Hough, pinhole geometry and TTC. We do not claim a new detector.</p>
+    <table class="grid compact">
+      <thead><tr><th>#</th><th>Source</th><th>Approach</th><th>Key result</th><th>Use in AutoSense</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Redmon et al., CVPR 2016</td><td>YOLO one-shot CNN</td><td>63.4% mAP · 45 FPS</td><td>Real-time backbone</td></tr>
+        <tr><td>2</td><td>Yu et al., CVPR 2020</td><td>BDD100K benchmark</td><td>24.5 AP · 56.7 MOTA</td><td>10-class driving data</td></tr>
+        <tr><td>3</td><td>Zhang et al., ECCV 2022</td><td>BYTE association</td><td>69.6 MOTA · 71.3 IDF1</td><td>Default tracker</td></tr>
+        <tr><td>4</td><td>Mao et al., 3D survey</td><td>LiDAR / camera / fusion</td><td>BtcDet 78.58% L1</td><td>Why we stay 2D</td></tr>
+        <tr><td>5</td><td>Qian et al., PR 2022</td><td>Taxonomy of 3D</td><td>AP3D / NDS</td><td>Depth / fusion gap</td></tr>
+        <tr><td>6</td><td>Bewley et al., SORT</td><td>Kalman + Hungarian</td><td>Realtime MOT</td><td>Tracking-by-detection</td></tr>
+        <tr><td>7</td><td>Wojke et al., DeepSORT</td><td>Appearance Re-ID</td><td>Fewer ID switches</td><td>Identity stability</td></tr>
+        <tr><td>8</td><td>Aharon et al., BoT-SORT</td><td>Bag-of-tricks MOT</td><td>Strong IDF1</td><td>Optional UI tracker</td></tr>
+        <tr><td>9</td><td>Canny, 1986</td><td>Optimal edge detector</td><td>Standard operator</td><td>Dynamic ROI stage</td></tr>
+        <tr><td>10</td><td>Duda &amp; Hart, Hough</td><td>Line parameter voting</td><td>Robust segments</td><td>Lane candidates</td></tr>
+        <tr><td>11</td><td>Ultralytics YOLO11</td><td>Train / track / export</td><td>YOLO11n 2.59M</td><td>Runtime API</td></tr>
+        <tr><td>12</td><td>Lin et al., COCO</td><td>80-class protocol</td><td>Default names</td><td>Bundled yolo11n.pt</td></tr>
+      </tbody>
+    </table>
+    <div class="quote rv" style="--d:.45s;margin-top:10px">Gap: an inspectable real-time student stack that (i) runs on one camera, (ii) exposes every intermediate, (iii) states uncertainty, (iv) never fabricates ego speed. Composition is the claim.</div>
+  </section>
+
+  <!-- 04 DATASET -->
+  <section class="slide" id="s4">
+    <div class="rv" style="--d:.05s"><div class="kick">03 · Dataset, Platform &amp; Stack</div></div>
+    <h2 class="t rv" style="--d:.1s">BDD100K official split, <em>laptop GPU</em> runtime</h2>
+    <div class="statrow rv" style="--d:.18s">
+      <div class="stat"><div class="n" data-count="70000">0</div><div class="l">Train images</div></div>
+      <div class="stat"><div class="n" data-count="10000">0</div><div class="l">Val images</div></div>
+      <div class="stat"><div class="n" data-count="20000">0</div><div class="l">Test images</div></div>
+      <div class="stat"><div class="n">1.29M</div><div class="l">Train objects · 0 invalid</div></div>
+    </div>
+    <div class="two uneven">
+      <div>
+        <table class="grid compact rv" style="--d:.24s">
+          <thead><tr><th>Split</th><th>Images</th><th>Labels</th><th>Objects</th><th>Invalid</th></tr></thead>
+          <tbody>
+            <tr><td>Train</td><td>70 000</td><td>70 000</td><td>1 288 405</td><td>0</td></tr>
+            <tr><td>Validation</td><td>10 000</td><td>10 000</td><td>185 578</td><td>0</td></tr>
+            <tr><td>Test</td><td>20 000</td><td>20 000</td><td>367 728</td><td>0</td></tr>
+          </tbody>
+        </table>
+        <div class="num rv" style="--d:.32s;margin-top:8px">TEN CLASSES · CARS DOMINATE</div>
+        <div class="tagrow rv" style="--d:.36s">
+          <span class="chip">person</span><span class="chip">rider</span><span class="chip">car</span>
+          <span class="chip">bus</span><span class="chip">truck</span><span class="chip">bike</span>
+          <span class="chip">motor</span><span class="chip">traffic light</span><span class="chip">traffic sign</span>
+          <span class="chip">train · 15 val</span>
+        </div>
+        <div class="cbars rv" style="--d:.4s;margin-top:8px">
+          <div class="cbar"><span>car</span><i style="--p:79%;--d:.2s"></i><b>1.02M</b></div>
+          <div class="cbar"><span>sign / light</span><i style="--p:36%;--d:.28s"></i><b>high</b></div>
+          <div class="cbar"><span>person</span><i style="--p:22%;--d:.36s"></i><b>mid</b></div>
+          <div class="cbar"><span>truck / bus</span><i style="--p:14%;--d:.44s"></i><b>mid</b></div>
+          <div class="cbar"><span>train</span><i style="--p:3%;--d:.52s"></i><b>15 inst.</b></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel rv" style="--d:.28s">
+          <div class="num">TRAIN HOST</div>
+          <p class="mini" style="margin-top:6px"><b>Kaggle Tesla T4</b> · 20 epochs · batch 16 · AMP · imgsz 640 · patience 6 · mosaic closed near end · HSV, ±3°, translate 0.1, scale 0.5, flip 0.5.</p>
+        </div>
+        <div class="panel rv" style="--d:.36s;margin-top:8px">
+          <div class="num">RUNTIME HOST · 27 SEP 2026</div>
+          <p class="mini" style="margin-top:6px"><b>Windows i5-13420H / RTX 2050</b> · 540p dashcam @640. GPU 26.4 fps / 30.9 ms. CPU 16.2 fps / 54.4 ms. Boot → first frame 15.7 s.</p>
+        </div>
+        <div class="panel rv" style="--d:.44s;margin-top:8px">
+          <div class="num">STACK</div>
+          <p class="mini" style="margin-top:6px">Python 3.11 · Ultralytics 8.4 · PyTorch CUDA · OpenCV · NumPy · FastAPI · uvicorn · vanilla HTML/CSS/JS · pytest. Repo <b>Sarthak156/AutoSense_DR</b>. Notebook <b>autonomous-perception</b>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 IMPLEMENTATION -->
+  <section class="slide" id="s5">
+    <div class="rv" style="--d:.05s"><div class="kick">04 · Implementation · Seven Modules</div></div>
+    <h2 class="t rv" style="--d:.1s">One learned model. Geometry and rules for the <em>rest</em>.</h2>
+    <div class="flow rv" style="--d:.18s">
+      <div class="fn">VIDEO</div><div class="fa"></div>
+      <div class="fn hot">YOLO11</div><div class="fa"></div>
+      <div class="fn">TRACK</div><div class="fa"></div>
+      <div class="fn">DISTANCE</div><div class="fa"></div>
+      <div class="fn">ROI</div><div class="fa"></div>
+      <div class="fn">TTC</div><div class="fa"></div>
+      <div class="fn">DASH</div>
+    </div>
+    <div class="modgrid" style="margin-top:10px">
+      <div class="mod rv" style="--d:.24s"><h4>1 · Input</h4><p>VideoCapture or camera index. Routes /api/source/video|camera. Play / pause / resume / restart / stop. Idle frame: NO INPUT SOURCE.</p></div>
+      <div class="mod rv" style="--d:.28s"><h4>2 · Detect</h4><p>YOLO11n track/predict · conf 0.35 · IoU 0.45 · imgsz 640. 182 layers · 2 591 790 params. Swap COCO 80-class or BDD 10-class .pt live.</p></div>
+      <div class="mod rv" style="--d:.32s"><h4>3 · Track</h4><p>persist=True · bytetrack.yaml default · botsort.yaml optional. Registry keyed by ID. Disable tracking → TTC unavailable (correct).</p></div>
+      <div class="mod rv" style="--d:.36s"><h4>4 · Dynamic ROI</h4><p>Gray → 5×5 blur → Canny → HoughLinesP → RANSAC / quadratic. Reuse ≤ 8 with decay, then fallback trapezoid. Never drops a box.</p></div>
+      <div class="mod rv" style="--d:.4s"><h4>5 · Distance</h4><p>D = (H · F) / h · F default 700 px (live-editable). Smooth window 5. Heights: person 1.70 · car 1.50 · truck/bus 3.20 · train 3.50 m.</p></div>
+      <div class="mod rv" style="--d:.44s"><h4>6 · TTC + Risk + Serve</h4><p>Closing speed from 8-sample deque. TTC cap 60 s. CRITICAL D≤3 m / 1 s → BRAKE. FastAPI MJPEG + WS ~5 Hz · nine pages.</p></div>
+    </div>
+    <p class="footnote rv" style="--d:.52s">ROIObjectAssociator returns in / near / outside / uncertain. Safety uses boolean <b>in_path</b> only. Overlay HUD draws corridor, boxes, IDs, distance. JPEG quality 80. Config patches deep-merge under a lock.</p>
+  </section>
+
+  <!-- 06 TRAINING -->
+  <section class="slide" id="s6">
+    <div class="rv" style="--d:.05s"><div class="kick">05 · Model Training &amp; Evaluation</div></div>
+    <h2 class="t rv" style="--d:.1s">YOLO11n · 20 epochs · val on <em>10 000</em> images</h2>
+    <div class="statrow rv" style="--d:.18s">
+      <div class="stat"><div class="n" data-count="0.418" data-dec="3">0.000</div><div class="l">mAP50 · all</div></div>
+      <div class="stat"><div class="n" data-count="0.227" data-dec="3">0.000</div><div class="l">mAP50–95</div></div>
+      <div class="stat"><div class="n" data-count="0.651" data-dec="3">0.000</div><div class="l">Precision</div></div>
+      <div class="stat"><div class="n" data-count="0.386" data-dec="3">0.000</div><div class="l">Recall</div></div>
+      <div class="stat"><div class="n" data-count="0.721" data-dec="3">0.000</div><div class="l">Car mAP50</div></div>
+    </div>
+    <div class="two wideleft">
+      <table class="grid compact">
+        <thead><tr><th>Class</th><th>Images</th><th>Inst.</th><th>P</th><th>R</th><th>mAP50</th><th>mAP50-95</th></tr></thead>
+        <tbody>
+          <tr><td>all</td><td>10 000</td><td>185 578</td><td>0.651</td><td>0.386</td><td>0.418</td><td>0.227</td></tr>
+          <tr><td>person</td><td>3 220</td><td>13 265</td><td>0.640</td><td>0.433</td><td>0.488</td><td>0.225</td></tr>
+          <tr><td>rider</td><td>515</td><td>649</td><td>0.573</td><td>0.290</td><td>0.312</td><td>0.143</td></tr>
+          <tr><td>car</td><td>9 879</td><td>102 540</td><td>0.702</td><td>0.685</td><td>0.721</td><td>0.434</td></tr>
+          <tr><td>bus</td><td>1 242</td><td>1 597</td><td>0.623</td><td>0.453</td><td>0.512</td><td>0.386</td></tr>
+          <tr><td>truck</td><td>2 689</td><td>4 247</td><td>0.633</td><td>0.482</td><td>0.534</td><td>0.379</td></tr>
+          <tr><td>bike</td><td>578</td><td>1 007</td><td>0.482</td><td>0.282</td><td>0.290</td><td>0.137</td></tr>
+          <tr><td>motor</td><td>334</td><td>452</td><td>0.620</td><td>0.220</td><td>0.286</td><td>0.132</td></tr>
+          <tr><td>traffic light</td><td>5 653</td><td>26 891</td><td>0.578</td><td>0.529</td><td>0.505</td><td>0.173</td></tr>
+          <tr><td>traffic sign</td><td>8 221</td><td>34 915</td><td>0.656</td><td>0.491</td><td>0.536</td><td>0.266</td></tr>
+          <tr><td>train</td><td>14</td><td>15</td><td>1.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+        </tbody>
+      </table>
+      <div>
+        <div class="panel rv" style="--d:.3s">
+          <div class="num">TRAINING RECIPE</div>
+          <p class="mini" style="margin-top:6px">COCO-pretrained YOLO11n → BDD100K. 20 epochs · batch 16 · AMP · patience 6 · 182 layers · 2.59M params (2.58M fused). T4: 0.1 ms pre · <b>1.3 ms inf</b> · 1.5 ms post. Exported <b>best.pt</b> + ONNX 10.1 MB.</p>
+        </div>
+        <div class="panel rv" style="--d:.38s;margin-top:8px">
+          <div class="num">HONEST IMBALANCE</div>
+          <p class="mini" style="margin-top:6px">102 540 car instances vs 15 train instances. Cars carry the score. Train mAP50 = 0 — reported, not hidden. Extra notebook val/test cells failed on a path mismatch; Table 5.5 is the trainer’s own val of best.pt at epoch 20.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 RUNTIME -->
+  <section class="slide" id="s7">
+    <div class="rv" style="--d:.05s"><div class="kick">06 · Runtime Dashboard · 27 Sep 2026</div></div>
+    <h2 class="t rv" style="--d:.1s">Measured on an <em>RTX 2050</em> — not a slide mock</h2>
+    <div class="two uneven">
+      <div class="hudframe rv" style="--d:.2s">
+        <div class="sky"></div>
+        <div class="horizon"></div>
+        <div class="road"></div>
+        <div class="corridor"></div>
+        <div class="scan"></div>
+        <div class="hudread">
+          <span>FPS <b data-live="fps" data-base="26.4" data-jitter="0.7" data-dec="1">26.4</b></span>
+          <span>INF <b data-live="ms" data-base="30.9" data-jitter="1.4" data-dec="1">30.9</b> ms</span>
+          <span class="hot">WARNING</span>
+        </div>
+        <div class="bbox" style="left:18%;top:42%;width:16%;height:22%"><span class="tag">CAR · 18.4 m</span></div>
+        <div class="bbox warnbox" style="left:44%;top:48%;width:12%;height:28%"><span class="tag">CAR · 11.8 m</span></div>
+        <div class="bbox" style="left:68%;top:40%;width:20%;height:26%"><span class="tag">TRUCK · 24.1 m</span></div>
+      </div>
+      <div>
+        <div class="statrow rv" style="--d:.24s">
+          <div class="stat"><div class="n">26.4</div><div class="l">fps GPU 540p</div></div>
+          <div class="stat"><div class="n">16.2</div><div class="l">fps CPU</div></div>
+        </div>
+        <div class="statrow rv" style="--d:.3s">
+          <div class="stat"><div class="n">30.9</div><div class="l">ms GPU inf</div></div>
+          <div class="stat"><div class="n">54.4</div><div class="l">ms CPU inf</div></div>
+        </div>
+        <table class="grid compact rv" style="--d:.36s">
+          <thead><tr><th>Check</th><th>Observed</th></tr></thead>
+          <tbody>
+            <tr><td>GET /healthz</td><td>ok true · state running</td></tr>
+            <tr><td>GET /api/models</td><td>yolo11n.pt · 15.9 MB · 80 cls</td></tr>
+            <tr><td>GET /api/video/frame</td><td>JPEG magic ffd8</td></tr>
+            <tr><td>WS /ws</td><td>fps 24.3 on connect</td></tr>
+            <tr><td>GET /api/report ~9 s</td><td>22 frames · 121 det · 23.7 fps</td></tr>
+            <tr><td>device cpu → auto</td><td>16.2 fps ↔ 26.4 fps</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="footnote rv" style="--d:.48s">Nine pages: Dashboard, Video Input, Detection, Tracking, Distance &amp; ROI, Safety, Visualizations, Model, Settings. Cold sweeps 8–11 fps (GPU power-state). 1080p upload ≈ 7 fps. Contended GPU can collapse inference — benchmark idle.</p>
+  </section>
+
+  <!-- 08 SAFETY -->
+  <section class="slide" id="s8">
+    <div class="rv" style="--d:.05s"><div class="kick">07 · Safety Layer · Rule Table + Traces</div></div>
+    <h2 class="t rv" style="--d:.1s">In-path gating, not <em>raw TTC</em></h2>
+    <div class="fsm rv" style="--d:.18s">
+      <div class="st on-ok"><b>CONTINUE</b>SAFE · not in-path</div>
+      <div class="st on-warn"><b>WARNING</b>D ≤ 12 m or TTC ≤ 4 s</div>
+      <div class="st"><b>BRAKE</b>CRITICAL / DANGER · advisory</div>
+    </div>
+    <div class="two" style="margin-top:10px">
+      <table class="grid compact rv" style="--d:.26s">
+        <thead><tr><th>Level</th><th>Distance</th><th>TTC</th><th>Decision</th></tr></thead>
+        <tbody>
+          <tr><td>CRITICAL</td><td>D ≤ 3.0 m</td><td>TTC ≤ 1.0 s</td><td>BRAKE</td></tr>
+          <tr><td>DANGER</td><td>D ≤ 6.0 m</td><td>TTC ≤ 2.0 s</td><td>BRAKE</td></tr>
+          <tr><td>WARNING</td><td>D ≤ 12.0 m</td><td>TTC ≤ 4.0 s</td><td>WARNING</td></tr>
+          <tr><td>SAFE</td><td>else / not in-path</td><td>—</td><td>CONTINUE</td></tr>
+        </tbody>
+      </table>
+      <table class="grid compact rv" style="--d:.3s">
+        <thead><tr><th>Class</th><th>Assumed H</th><th>Class</th><th>Assumed H</th></tr></thead>
+        <tbody>
+          <tr><td>person / rider</td><td>1.70 m</td><td>car</td><td>1.50 m</td></tr>
+          <tr><td>truck / bus</td><td>3.20 m</td><td>motorcycle</td><td>1.40 m</td></tr>
+          <tr><td>bicycle</td><td>1.50 m</td><td>train</td><td>3.50 m</td></tr>
+          <tr><td>traffic light</td><td>0.60 m</td><td>traffic sign</td><td>0.75 m</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="g2" style="margin-top:10px">
+      <div class="card rv" style="--d:.38s">
+        <span class="num warn">TRACE A · tunnel_drive.mp4 · imgsz 640</span>
+        <h3 class="warn">WARNING / WARNING</h3>
+        <p>Closest in-path <b>11.78 m</b> (≤ 12 m warning). Min TTC <b>4.63 s</b> (above 4 s TTC trigger). Distance rule fired. Not simulated.</p>
+      </div>
+      <div class="card rv" style="--d:.44s">
+        <span class="num ok">TRACE B · dashcam_city.mp4</span>
+        <h3 class="ok">SAFE / CONTINUE</h3>
+        <p>Min TTC <b>0.91 s</b> on an object <b>outside</b> the corridor. In-path gating refused BRAKE. ROI never dropped the detection.</p>
+      </div>
+    </div>
+    <p class="footnote rv" style="--d:.52s">Order: not in_path → SAFE; missing D → SAFE; else thresholds. TTC None if closing speed ≤ 0.1 m/s. Advisory only — must not be wired to a vehicle.</p>
+  </section>
+
+  <!-- 09 TESTING + NEXT -->
+  <section class="slide" id="s9">
+    <div class="rv" style="--d:.05s"><div class="kick">08 · Tests, Limits &amp; Next Steps</div></div>
+    <h2 class="t rv" style="--d:.1s">V-model + 16 cases — then <em>harden</em></h2>
+    <div class="two wideleft">
+      <div>
+        <div class="num rv" style="--d:.18s">TC-01 … TC-16 · ALL PASS</div>
+        <div class="tcgrid rv" style="--d:.24s;margin-top:8px">
+          <div class="tc"><span class="id">TC-01</span>Curved lane quadratic fit</div>
+          <div class="tc"><span class="id">TC-09</span>Retain outside boxes</div>
+          <div class="tc"><span class="id">TC-02</span>Multi-lane centre-prior pair</div>
+          <div class="tc"><span class="id">TC-10</span>Overlap association</div>
+          <div class="tc"><span class="id">TC-03</span>Search centre ≠ static trap</div>
+          <div class="tc"><span class="id">TC-11</span>/healthz running</div>
+          <div class="tc"><span class="id">TC-04</span>Missing markings → fallback</div>
+          <div class="tc"><span class="id">TC-12</span>JPEG ffd8 stream</div>
+          <div class="tc"><span class="id">TC-05</span>Hard shadows uncertain</div>
+          <div class="tc"><span class="id">TC-13</span>GPU 26.4 fps / 30.9 ms</div>
+          <div class="tc"><span class="id">TC-06</span>Crosswalk bars rejected</div>
+          <div class="tc"><span class="id">TC-14</span>CPU 16.2 fps / 54.4 ms</div>
+          <div class="tc"><span class="id">TC-07</span>Aspect jump clears history</div>
+          <div class="tc"><span class="id">TC-15</span>In-path WARNING 11.78 m</div>
+          <div class="tc"><span class="id">TC-08</span>Reuse ≤ 8, then fallback</div>
+          <div class="tc"><span class="id">TC-16</span>Out-of-path TTC 0.91 s SAFE</div>
+        </div>
+        <p class="footnote rv" style="--d:.4s">pytest without weights (ROI + association + render layers). No k-fold — official BDD split is the substitute. Manual: pause/resume, loop-on-EOF, CAMERA ERROR, MODEL RUNTIME UNAVAILABLE, WS → 350 ms poll.</p>
+      </div>
+      <div>
+        <div class="card rv" style="--d:.28s"><span class="num">LIMITS</span><h3>Inherent</h3><p>Pinhole D is not LiDAR. Classical ROI fails at night, rain, worn paint, intersections. Risk ignores class and ego speed (null). Train class unlearnable. No auth — localhost only.</p></div>
+        <div class="card rv" style="--d:.36s;margin-top:8px"><span class="num">NEXT</span><h3>Harden</h3><p>JSONL logs, incident stills, optional ego-speed, F calibration wizard, per-class risk, TestClient smokes, ONNX / TensorRT, Dockerfile, config persistence.</p></div>
+        <div class="card rv" style="--d:.44s;margin-top:8px"><span class="num">NEVER</span><h3>Non-goals</h3><p>No actuation. No fake speed. No ADAS / ISO 26262 claim. No stereo/LiDAR in this Mini Project. WARNING/BRAKE are UI labels.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 CLOSE -->
+  <section class="slide" id="s10">
+    <div class="slash"></div>
+    <div class="rv" style="--d:.05s"><div class="kick">09 · Conclusion</div></div>
+    <h2 class="t rv" style="--d:.1s">From detection to <em>understanding</em></h2>
+    <p class="lead rv" style="--d:.16s;max-width:900px">The Mini Project built a camera-based real-time perception system for research, not a self-driving stack. Existing methods, composed, measured, and discussed without exaggeration.</p>
+    <div class="kpis rv" style="--d:.24s">
+      <div class="kpi"><div class="n">0.418</div><div class="l">mAP50 · 10k val</div></div>
+      <div class="kpi"><div class="n">0.721</div><div class="l">car mAP50</div></div>
+      <div class="kpi"><div class="n">26.4</div><div class="l">fps · RTX 2050</div></div>
+      <div class="kpi"><div class="n">11.78 m</div><div class="l">in-path WARNING</div></div>
+    </div>
+    <div class="two" style="margin-top:12px">
+      <div class="panel rv" style="--d:.32s">
+        <div class="num">WHAT SHIPPED</div>
+        <p class="mini" style="margin-top:8px">YOLO11 detect + ByteTrack/BoT-SORT + pinhole distance + training-free corridor + TTC + advisory risk + nine-page FastAPI dashboard. Every FPS, inference_ms, distance and risk label is traceable. Unavailable signals stay unavailable.</p>
+        <div class="chips" style="margin:10px 0 0">
+          <span class="chip">SEES</span><span class="plus">→</span>
+          <span class="chip">TRACKS</span><span class="plus">→</span>
+          <span class="chip">MEASURES</span><span class="plus">→</span>
+          <span class="chip">ADVISES</span>
+        </div>
+      </div>
+      <div class="panel rv" style="--d:.4s">
+        <div class="num">TEAM · CSE (DATA SCIENCE) · 2026–27</div>
+        <p class="mini" style="margin-top:8px">
+          Rupal Sharma 0808DS241115 · Sarthak Goyal 0808DS241122<br>
+          Ritima Rajput 0808DS241113 · Suhani Thakur 0808DS241133<br><br>
+          Guide: <b>Mr. Pankaj Pateriya</b>, Assistant Professor<br>
+          IPS Academy, Institute of Engineering &amp; Science, Indore
+        </p>
+      </div>
+    </div>
+    <div class="fin rv" style="--d:.5s;margin-top:16px">
+      <div class="big">Questions?</div>
+      <div class="sm">THANK YOU · AUTOSENSE · COMPOSITION IS THE CONTRIBUTION</div>
+    </div>
+  </section>
+
+  <nav id="nav" aria-label="Slide navigation">
+    <button id="prev" aria-label="Previous">‹</button>
+    <button id="next" aria-label="Next">›</button>
+  </nav>
+  <button id="fs" title="Fullscreen (F)">⛶</button>
+  <button id="themeBtn" title="Theme (T)">☾</button>
+  <button id="pdfBtn" title="Export PDF (P)">⬇</button>
+  <div id="toast" role="status"></div>
+</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var deck = document.getElementById("deck");
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var barFill = document.querySelector("#bar i");
+  var countEl = document.querySelector("#count b");
+  var themeBtn = document.getElementById("themeBtn");
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+  var liveTimer = null;
+  var cur = 0;
+
+  function fit() {
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    deck.style.transform = "translate(-50%,-50%) scale(" + s + ")";
+  }
+  window.addEventListener("resize", fit); fit();
+
+  (function particles() {
+    var c = document.getElementById("fx");
+    if (!c || !c.getContext) return;
+    var ctx = c.getContext("2d");
+    var N = 40, ps = [];
+    function reset(p, init) {
+      p.x = Math.random() * 1280;
+      p.y = init ? Math.random() * 720 : 730;
+      p.s = 0.5 + Math.random() * 1.6;
+      p.v = 0.2 + Math.random() * 0.65;
+      p.a = 0.08 + Math.random() * 0.28;
+      p.w = (Math.random() - 0.5) * 0.4;
+    }
+    for (var i = 0; i < N; i++) { var p = {}; reset(p, true); ps.push(p); }
+    function tick() {
+      var dark = document.documentElement.getAttribute("data-theme") !== "light";
+      ctx.clearRect(0, 0, 1280, 720);
+      for (var i = 0; i < N; i++) {
+        var q = ps[i];
+        q.y -= q.v; q.x += q.w;
+        if (q.y < -8) reset(q, false);
+        ctx.beginPath();
+        ctx.fillStyle = dark
+          ? "rgba(255,90,31," + q.a + ")"
+          : "rgba(194,65,12," + (q.a * 0.45) + ")";
+        ctx.arc(q.x, q.y, q.s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function tickClock() {
+    var el = document.getElementById("liveclock");
+    if (!el) return;
+    var d = new Date();
+    el.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+  }
+  tickClock(); setInterval(tickClock, 1000);
+
+  function countUp(el) {
+    var raw = el.getAttribute("data-count");
+    var target = parseFloat(raw);
+    if (isNaN(target)) return;
+    var dec = el.getAttribute("data-dec");
+    if (dec === null) dec = (raw.indexOf(".") >= 0) ? (raw.split(".")[1] || "").length : 0;
+    else dec = parseInt(dec, 10);
+    var t0 = null, dur = 1200;
+    function step(t) {
+      if (!t0) t0 = t;
+      var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      var v = target * e;
+      el.textContent = dec ? v.toFixed(dec) : Math.round(v).toLocaleString("en-US");
+      if (p < 1) requestAnimationFrame(step);
+    }
+    el.textContent = dec ? (0).toFixed(dec) : "0";
+    requestAnimationFrame(step);
+  }
+
+  function stopLive() {
+    if (liveTimer) { clearInterval(liveTimer); liveTimer = null; }
+  }
+  function startLive(slide) {
+    stopLive();
+    var nodes = slide.querySelectorAll("[data-live]");
+    if (!nodes.length) return;
+    liveTimer = setInterval(function () {
+      for (var i = 0; i < nodes.length; i++) {
+        var el = nodes[i];
+        var base = parseFloat(el.getAttribute("data-base"));
+        var j = parseFloat(el.getAttribute("data-jitter") || "0.4");
+        var dec = parseInt(el.getAttribute("data-dec") || "1", 10);
+        el.textContent = (base + (Math.random() * 2 - 1) * j).toFixed(dec);
+      }
+    }, 240);
+  }
+
+  function go(n, dir) {
+    n = Math.max(0, Math.min(slides.length - 1, n));
+    if (n === cur && slides[cur].classList.contains("active")) { syncHash(n); return; }
+    var d = (typeof dir === "number") ? dir : (n > cur ? 1 : -1);
+    deck.classList.toggle("back", d < 0);
+    slides[cur].classList.remove("active");
+    cur = n;
+    slides[cur].classList.add("active");
+    barFill.style.width = ((cur + 1) / slides.length * 100) + "%";
+    countEl.textContent = String(cur + 1).padStart(2, "0");
+    Array.prototype.forEach.call(slides[cur].querySelectorAll("[data-count]"), countUp);
+    startLive(slides[cur]);
+    syncHash(n);
+  }
+  function syncHash(n) {
+    if (("#" + (n + 1)) !== location.hash) {
+      try { history.replaceState(null, "", "#" + (n + 1)); } catch (e) {}
+    }
+  }
+
+  document.getElementById("prev").addEventListener("click", function (ev) { ev.stopPropagation(); go(cur - 1, -1); });
+  document.getElementById("next").addEventListener("click", function (ev) { ev.stopPropagation(); go(cur + 1, 1); });
+  document.getElementById("edgeL").addEventListener("click", function (ev) { ev.stopPropagation(); go(cur - 1, -1); });
+  document.getElementById("edgeR").addEventListener("click", function (ev) { ev.stopPropagation(); go(cur + 1, 1); });
+
+  function toggleFS() {
+    if (!document.fullscreenElement) {
+      (document.documentElement.requestFullscreen || function () {}).call(document.documentElement);
+    } else if (document.exitFullscreen) document.exitFullscreen();
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("deck-theme", t); } catch (e) {}
+    themeBtn.textContent = (t === "dark") ? "☾" : "☀";
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  }
+  function showToast(msg) {
+    toast.innerHTML = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 4200);
+  }
+  function exportPDF() {
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    showToast("Print dialog → <b>Save as PDF</b> · " + (isDark ? "ember/carbon" : "parchment") + " · 10 slides");
+    stopLive();
+    var hash = parseInt((location.hash || "#1").slice(1), 10) || 1;
+    slides.forEach(function (s) { s.classList.add("active"); });
+    var restore = function () {
+      slides.forEach(function (s, i) { s.classList.toggle("active", i === hash - 1); });
+      startLive(slides[hash - 1]);
+      window.removeEventListener("afterprint", restore);
+    };
+    window.addEventListener("afterprint", restore);
+    setTimeout(function () { window.print(); }, 180);
+  }
+
+  document.getElementById("fs").addEventListener("click", function (ev) { ev.stopPropagation(); toggleFS(); });
+  themeBtn.addEventListener("click", function (ev) { ev.stopPropagation(); toggleTheme(); });
+  document.getElementById("pdfBtn").addEventListener("click", function (ev) { ev.stopPropagation(); exportPDF(); });
+
+  document.addEventListener("keydown", function (ev) {
+    var k = ev.key;
+    if (k === "ArrowRight" || k === "ArrowDown" || k === " " || k === "PageDown" || k === "Enter") { ev.preventDefault(); go(cur + 1, 1); }
+    else if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp" || k === "Backspace") { ev.preventDefault(); go(cur - 1, -1); }
+    else if (k === "Home") { ev.preventDefault(); go(0, -1); }
+    else if (k === "End") { ev.preventDefault(); go(slides.length - 1, 1); }
+    else if (k === "f" || k === "F") toggleFS();
+    else if (k === "t" || k === "T") toggleTheme();
+    else if (k === "p" || k === "P") exportPDF();
+  });
+
+  var wheelLock = 0;
+  deck.addEventListener("wheel", function (ev) {
+    var now = Date.now();
+    if (now - wheelLock < 850) return;
+    if (Math.abs(ev.deltaY) < 18) return;
+    wheelLock = now;
+    go(ev.deltaY > 0 ? cur + 1 : cur - 1, ev.deltaY > 0 ? 1 : -1);
+  }, { passive: true });
+
+  var tx = null, ty = null;
+  deck.addEventListener("touchstart", function (ev) { tx = ev.touches[0].clientX; ty = ev.touches[0].clientY; }, { passive: true });
+  deck.addEventListener("touchend", function (ev) {
+    if (tx === null) return;
+    var dx = ev.changedTouches[0].clientX - tx, dy = ev.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? cur + 1 : cur - 1, dx < 0 ? 1 : -1);
+    tx = ty = null;
+  }, { passive: true });
+
+  window.addEventListener("hashchange", function () {
+    var n = parseInt((location.hash || "#1").slice(1), 10);
+    if (!isNaN(n) && n >= 1 && n <= slides.length && (n - 1) !== cur) go(n - 1);
+  });
+
+  var saved = "dark";
+  try { saved = localStorage.getItem("deck-theme") || "dark"; } catch (e) {}
+  applyTheme(saved);
+
+  var start = parseInt((location.hash || "#1").slice(1), 10);
+  if (isNaN(start) || start < 1 || start > slides.length) start = 1;
+  slides[0].classList.remove("active");
+  go(start - 1, 1);
+})();
+</script>
+</body>
+</html>
