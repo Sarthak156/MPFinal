@@ -561,4 +561,18 @@ table.grid.compact th { font-size: 10px; }
   .cbar i::after { transform: none !important; }
   .ring circle.fg { stroke-dasharray: var(--p) 100 !important; }
   #deck::before, #deck::after, .slash { display: none !important; }
+  html, body { background: var(--deck0) !important; }
+  h1 .hl, h2.t em {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    color: var(--acc) !important;
+    -webkit-text-fill-color: var(--acc) !important;
+  }
+  .livepill {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: 460px !important;
+  }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
 }

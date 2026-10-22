@@ -146,9 +146,9 @@
     <div class="rv" style="--d:.05s"><div class="kick">03 · Dataset, Platform &amp; Stack</div></div>
     <h2 class="t rv" style="--d:.1s">BDD100K official split, <em>laptop GPU</em> runtime</h2>
     <div class="statrow rv" style="--d:.18s">
-      <div class="stat"><div class="n" data-count="70000">0</div><div class="l">Train images</div></div>
-      <div class="stat"><div class="n" data-count="10000">0</div><div class="l">Val images</div></div>
-      <div class="stat"><div class="n" data-count="20000">0</div><div class="l">Test images</div></div>
+      <div class="stat"><div class="n" data-count="70000">70,000</div><div class="l">Train images</div></div>
+      <div class="stat"><div class="n" data-count="10000">10,000</div><div class="l">Val images</div></div>
+      <div class="stat"><div class="n" data-count="20000">20,000</div><div class="l">Test images</div></div>
       <div class="stat"><div class="n">1.29M</div><div class="l">Train objects · 0 invalid</div></div>
     </div>
     <div class="two uneven">
@@ -222,11 +222,11 @@
     <div class="rv" style="--d:.05s"><div class="kick">05 · Model Training &amp; Evaluation</div></div>
     <h2 class="t rv" style="--d:.1s">YOLO11n · 20 epochs · val on <em>10 000</em> images</h2>
     <div class="statrow rv" style="--d:.18s">
-      <div class="stat"><div class="n" data-count="0.418" data-dec="3">0.000</div><div class="l">mAP50 · all</div></div>
-      <div class="stat"><div class="n" data-count="0.227" data-dec="3">0.000</div><div class="l">mAP50–95</div></div>
-      <div class="stat"><div class="n" data-count="0.651" data-dec="3">0.000</div><div class="l">Precision</div></div>
-      <div class="stat"><div class="n" data-count="0.386" data-dec="3">0.000</div><div class="l">Recall</div></div>
-      <div class="stat"><div class="n" data-count="0.721" data-dec="3">0.000</div><div class="l">Car mAP50</div></div>
+      <div class="stat"><div class="n" data-count="0.418" data-dec="3">0.418</div><div class="l">mAP50 · all</div></div>
+      <div class="stat"><div class="n" data-count="0.227" data-dec="3">0.227</div><div class="l">mAP50–95</div></div>
+      <div class="stat"><div class="n" data-count="0.651" data-dec="3">0.651</div><div class="l">Precision</div></div>
+      <div class="stat"><div class="n" data-count="0.386" data-dec="3">0.386</div><div class="l">Recall</div></div>
+      <div class="stat"><div class="n" data-count="0.721" data-dec="3">0.721</div><div class="l">Car mAP50</div></div>
     </div>
     <div class="two wideleft">
       <table class="grid compact">
@@ -576,17 +576,14 @@
   }
   function exportPDF() {
     var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    showToast("Print dialog → <b>Save as PDF</b> · " + (isDark ? "ember/carbon" : "parchment") + " · 10 slides");
-    stopLive();
-    var hash = parseInt((location.hash || "#1").slice(1), 10) || 1;
-    slides.forEach(function (s) { s.classList.add("active"); });
-    var restore = function () {
-      slides.forEach(function (s, i) { s.classList.toggle("active", i === hash - 1); });
-      startLive(slides[hash - 1]);
-      window.removeEventListener("afterprint", restore);
-    };
-    window.addEventListener("afterprint", restore);
-    setTimeout(function () { window.print(); }, 180);
+    var name = isDark ? "AutoSense_Presentation_Dark.pdf" : "AutoSense_Presentation_Light.pdf";
+    showToast("Downloading <b>" + name + "</b> · " + (isDark ? "ember/carbon" : "parchment") + " · 10 slides");
+    var a = document.createElement("a");
+    a.href = name;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   document.getElementById("fs").addEventListener("click", function (ev) { ev.stopPropagation(); toggleFS(); });
